@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Market Drawdown Analytics</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Lightweight Charts -->
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- Background Grid and Glowing Orbs -->
+    <div class="bg-grid"></div>
+    <div class="orb orb-gold"></div>
+    <div class="orb orb-cyan"></div>
+    <div class="orb orb-purple"></div>
+
+    <div class="layout-wrapper">
+        
+        <!-- Mobile Toggle -->
+        <button id="mobileMenuBtn" class="mobile-toggle">
+            <i data-lucide="menu"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <button id="closeSidebarBtn" class="mobile-close">
+                <i data-lucide="x"></i>
+            </button>
+
+            <!-- Header -->
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i data-lucide="bar-chart-3"></i>
+                </div>
+                <div>
+                    <h1>Market Analytics</h1>
+                    <p>AI-Powered Drawdown Analysis</p>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-card stat-success">
+                    <i data-lucide="trending-up"></i>
+                    <div id="statEvents" class="stat-value">--</div>
+                    <div class="stat-label">Events</div>
+                </div>
+                <div class="stat-card stat-danger">
+                    <i data-lucide="trending-down"></i>
+                    <div id="statAvgDrop" class="stat-value">--%</div>
+                    <div class="stat-label">Avg Drop</div>
+                </div>
+                <div class="stat-card stat-cyan">
+                    <i data-lucide="activity"></i>
+                    <div id="statAccuracy" class="stat-value">92.3%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="panel-header">
+                    <h3><i data-lucide="target" class="text-gold"></i> Analysis Parameters</h3>
+                    <button id="resetBtn" class="reset-link">Reset</button>
+                </div>
+
+                <div class="control-group">
+                    <label><div class="dot dot-gold"></div> Select Asset</label>
+                    <div class="pill-group" id="assetGroup">
+                        <button class="pill-btn active" data-value="gold">Gold</button>
+                        <button class="pill-btn" data-value="silver">Silver</button>
+                        <button class="pill-btn" data-value="bitcoin">Bitcoin</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label><div class="dot dot-cyan"></div> Timeframe Interval</label>
+                    <div class="pill-group" id="timeframeGroup">
+                        <button class="pill-btn font-mono" data-value="1h">1H</button>
+                        <button class="pill-btn font-mono active" data-value="1d">Daily</button>
+                        <button class="pill-btn font-mono" data-value="1wk">Weekly</button>
+                        <button class="pill-btn font-mono" data-value="1mo">Monthly</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label><div class="dot dot-purple"></div> Quick Time Range</label>
+                    <div class="pill-group-grid">
+                        <button class="quick-range-btn" data-days="30">Last 30 Days</button>
+                        <button class="quick-range-btn" data-days="90">Last 90 Days</button>
+                        <button class="quick-range-btn" data-days="365">1 Year</button>
+                        <button class="quick-range-btn" data-days="all">All Time</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label><i data-lucide="calendar"></i> Custom Date Range</label>
+                    <div class="date-inputs">
+                        <div class="input-with-icon">
+                            <span class="input-prefix">From</span>
+                            <input type="date" id="fromDate">
+                        </div>
+                        <div class="input-with-icon">
+                            <span class="input-prefix">To</span>
+                            <input type="date" id="toDate">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <div class="flex-row">
+                            <div class="dot dot-danger"></div> Drawdown Threshold
+                        </div>
+                        <div class="hint"><i data-lucide="info"></i> Min decline %</div>
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="drawdownSlider" min="1" max="20" step="0.5" value="5.0">
+                        <div class="slider-labels">
+                            <span>1%</span>
+                            <div class="slider-value-box"><span id="drawdownValueDisplay">5.0%</span></div>
+                            <span>20%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="analyzeBtn" class="primary-btn">
+                    <i data-lucide="zap"></i> Run Analysis
+                </button>
+                <div id="errorBox" class="error-box" style="display: none;"></div>
+            </div>
+
+            <!-- AI Prediction Widget -->
+            <div class="ai-widget">
+                <div class="ai-top-border"></div>
+                <div class="ai-header">
+                    <h3><i data-lucide="brain"></i> AI Forecast Engine</h3>
+                    <div class="badge-success">LSTM Model</div>
+                </div>
+                
+                <div class="ai-metrics">
+                    <div class="ai-card card-gold">
+                        <div class="card-title">
+                            <i data-lucide="trending-down"></i> Next Drop
+                        </div>
+                        <div id="aiDepth" class="ai-main-val">--%</div>
+                        <div class="ai-sub-val">LSTM Output</div>
+                    </div>
+                    <div class="ai-card card-cyan">
+                        <div class="card-title">
+                            <i data-lucide="clock"></i> Timeline
+                        </div>
+                        <div id="aiTime" class="ai-main-val">--d</div>
+                        <div class="ai-sub-val">Projected</div>
+                    </div>
+                </div>
+
+                <div class="confidence-section">
+                    <div class="conf-labels">
+                        <span>Confidence Score</span>
+                        <span class="font-mono">92.3%</span>
+                    </div>
+                    <div class="conf-bar-bg">
+                        <div class="conf-bar-fill" style="width: 92.3%"></div>
+                    </div>
+                </div>
+
+                <div class="ai-footer">
+                    Powered by PyTorch deep learning on historical data
+                </div>
+            </div>
+
+            <!-- Info Footer -->
+            <div class="sidebar-footer">
+                <span>Data fetched locally</span>
+                <div class="live-indicator">
+                    <div class="pulse-dot"></div>
+                    <span>Live</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <div class="top-header">
+                <div>
+                    <h2 id="assetTitle">Market Drawdown Visualization</h2>
+                    <p>Historical price action with AI-detected drawdown events</p>
+                </div>
+                <div class="header-badges">
+                    <div class="badge-gold">
+                        <i data-lucide="calendar"></i>
+                        <span id="dateRangeDisplay">-- → --</span>
+                    </div>
+                    <div class="badge-outline">
+                        <i data-lucide="bar-chart-3"></i>
+                        <span id="candleCountDisplay">-- Candles</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="chart-wrapper">
+                <div class="chart-glass-panel">
+                    
+                    <!-- Chart Legend & Overlays Toolbar -->
+                    <div class="chart-header-controls">
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color color-success"></div>
+                                <span>Bullish</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color color-danger"></div>
+                                <span>Bearish</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-triangle"></div>
+                                <span>Drawdown</span>
+                            </div>
+                        </div>
+
+                        <div class="chart-toolbar">
+                            <button id="toggleSmaBtn" class="toolbar-btn active">
+                                <i data-lucide="trending-up"></i> <span>20-day SMA</span>
+                            </button>
+                            <button id="toggleVolumeBtn" class="toolbar-btn active">
+                                <i data-lucide="bar-chart-3"></i> <span>Volume</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sleek Custom Floating Tooltip -->
+                    <div id="chartTooltip" class="chart-tooltip" style="opacity: 0; display: none;">
+                        <div class="tooltip-header">
+                            <span id="tooltipDate" class="tooltip-date">--</span>
+                        </div>
+                        <div class="tooltip-grid">
+                            <div class="tooltip-item">
+                                <span class="lbl">Open</span>
+                                <span id="tooltipOpen" class="val text-success">--</span>
+                            </div>
+                            <div class="tooltip-item">
+                                <span class="lbl">High</span>
+                                <span id="tooltipHigh" class="val">--</span>
+                            </div>
+                            <div class="tooltip-item">
+                                <span class="lbl">Low</span>
+                                <span id="tooltipLow" class="val">--</span>
+                            </div>
+                            <div class="tooltip-item">
+                                <span class="lbl">Close</span>
+                                <span id="tooltipClose" class="val text-danger">--</span>
+                            </div>
+                            <div class="tooltip-item full-width">
+                                <span class="lbl">Volume</span>
+                                <span id="tooltipVolume" class="val font-mono">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tvchart" class="chart-container"></div>
+                    
+                    <div id="loadingOverlay" class="chart-overlay">
+                        <div class="pulsing-gold"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
