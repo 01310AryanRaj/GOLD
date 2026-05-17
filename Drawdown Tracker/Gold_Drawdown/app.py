@@ -11,6 +11,22 @@ def index():
     return send_from_directory(app.static_folder, 'index.html')
 
 
+# Support relative asset paths at the root level locally under Flask
+@app.route('/style.css')
+def serve_style():
+    return send_from_directory(app.static_folder, 'style.css')
+
+
+@app.route('/script.js')
+def serve_script():
+    return send_from_directory(app.static_folder, 'script.js')
+
+
+@app.route('/data/<path:path>')
+def serve_data(path):
+    return send_from_directory(os.path.join(app.static_folder, 'data'), path)
+
+
 # ✅ DATE RANGE API
 @app.route('/api/date_range', methods=['GET'])
 def date_range():

@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchPredictions() {
         try {
             // predictions.json is in static/data so it's accessible at /static/data/predictions.json
-            const res = await fetch(`/static/data/predictions.json`);
+            const res = await fetch(`data/predictions.json`);
             if (res.ok) {
                 const data = await res.json();
                 if (data && data[currentAsset]) {
